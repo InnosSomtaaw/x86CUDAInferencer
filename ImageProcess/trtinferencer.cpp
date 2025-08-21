@@ -159,12 +159,14 @@ void trtInferencer::iniImgProcessor()
 }
 
 void trtInferencer::preprocess()
-{
+{    
     switch (workCond) {
-    case ObjDet:
-        dnn::blobFromImage(img_input1,img_output1, 1.0 / 255.0,
-                           Size(input_dims[0].d[3],input_dims[0].d[2]));
-        break;
+    case ObjDet:{
+        y8pp->letterboxInfo=y8pp->letterbox(
+                    img_input1,img_input2,Size(input_dims[0].d[3],input_dims[0].d[2]),
+                Scalar(114, 114, 114),false);
+        dnn::blobFromImage(img_input2,img_output1, 1.0 / 255.0);
+        break;}
     case SemSeg:
     default:
         dnn::blobFromImage(img_input1,img_output1,1.0f/255.0f,
@@ -201,8 +203,7 @@ void trtInferencer::postprocess()
         cvtColor(img_input1,img_output3,COLOR_RGB2BGR);
         img_output2=img_output2.reshape(1,output_dims[0].d[1]);
         transpose(img_output2,img_output2);
-//        y8pp->postprocess(img_output3,img_output2);
-        y8pp->postprocess(img_output2,img_output3.size());
+        y8pp->postprocess(img_output2);
         for (size_t idx = 0; idx < y8pp->posRects.size(); ++idx)
             y8pp->drawPred(y8pp->ids[idx],y8pp->confds[idx],
                            y8pp->posRects[idx].x,y8pp->posRects[idx].y,
@@ -231,7 +232,6 @@ void trtInferencer::proQImgOnce(QImage qimg)
 
     img_input1=Mat(qimg.height(), qimg.width(), CV_8UC3,
                    qimg.bits(), qimg.bytesPerLine());
-//    img_input1.copyTo(img_input2);
 
 //    ipcMutex.unlock();
     QThreadPool::globalInstance()->start(this);

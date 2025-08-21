@@ -154,7 +154,9 @@ void hwDecoder::run()
         // 每解出来一帧，丢到队列中;
         ret=avcodec_receive_frame(pAVctx, pAVframe);
         if (ret < 0) {
-//            printf("decode error.\n");
+//            cout<<"cam "<<camidx<<" decode error."<<endl;
+            av_packet_unref(packet);//释放资源,否则内存会一直上升
+            QThread::msleep(froceLag);
             continue;
         }
 

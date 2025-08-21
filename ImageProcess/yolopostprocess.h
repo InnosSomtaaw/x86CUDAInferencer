@@ -25,6 +25,8 @@ public:
     float SCORE_THRESHOLD = 0.5f;
     float NMS_THRESHOLD = 0.4f;
 
+    vector<float> letterboxInfo;
+
     // COCO数据集类别名称
     vector<string> classes = {
         "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
@@ -38,6 +40,8 @@ public:
         "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book",
         "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
     };
+    // MyClassed
+    vector<string> myClss={"person","spread","tractor"};
 
     vector<int> ids;
     vector<float> confds;
@@ -46,9 +50,12 @@ public:
     yoloPostProcess();
 
     void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat &frame);
-    void postprocess(Mat &frame, Mat &outs);
-
-    void postprocess(Mat &out,Size rawSz);
+    void postprocess(Mat &out);
+    std::vector<float> letterbox(const cv::Mat &src, cv::Mat &dst,
+                                 const cv::Size &out_size,
+                                 const cv::Scalar &color = cv::Scalar(114, 114, 114),
+                                 bool auto_flag = true, bool scale_fill = false,
+                                 bool scale_up = true);
 signals:
 
 };
