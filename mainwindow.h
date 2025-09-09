@@ -26,7 +26,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool isDetecting;
+    bool isDetecting,autoStart;
     std::array<QElapsedTimer,4> timers;
 
 private:

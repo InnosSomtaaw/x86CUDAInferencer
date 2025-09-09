@@ -20,6 +20,16 @@ MainWindow::MainWindow(QWidget *parent)
     initCamSettings();
     //数字相机类初始化
     initVideoPlayers();
+    if(autoStart)
+    {
+        ui->textBrowser1->hide();
+        ui->textBrowser2->hide();
+        ui->textBrowser3->hide();
+        ui->textBrowser4->hide();
+        ui->checkBoxSaving->setChecked(true);      
+        QThread::sleep(3);
+        ui->buttonStartCapture->click();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +81,7 @@ void MainWindow::initWorkCondition()
     proj_paths[1] = iniRW->value("TensorRTInference/ModelPath2").toString();
     proj_paths[2] = iniRW->value("TensorRTInference/ModelPath3").toString();
     proj_paths[3] = iniRW->value("TensorRTInference/ModelPath4").toString();
+    autoStart=iniRW->value("WorkCondition/autoStart").toBool();
 }
 
 void MainWindow::initTextBrowsers()
@@ -155,6 +166,8 @@ void MainWindow::initVideoPlayers()
         cams[i]=new hwDecoder;
         cams[i]->camURL=urls[i];
         cams[i]->froceLag=froceLag;
+        if(urls[i].contains("mp4"))
+            cams[i]->froceLag+=40;
         camProThds[i]=new QThread;
         cams[i]->moveToThread(camProThds[i]);
         camProThds[i]->start();
@@ -387,6 +400,8 @@ void MainWindow::slotimagebox1Refresh()
                 imgProcessors[0]->img_input1.cols*imgProcessors[0]->img_input1.channels(),
                 QImage::Format_RGB888);
     pixmapShows[0].setPixmap(QPixmap::fromImage(disImage));
+    if(autoStart)
+        ui->imagebox1->Adapte();
     long gap2recv=timers[0].elapsed();
     timers[0].start();
     //界面状态显示
@@ -398,22 +413,14 @@ void MainWindow::slotimagebox1Refresh()
     double fps=1000/double(gap2recv);
     tempStr="1st camera FPS(processed): "+QString::number(fps,'f',1)+".\n";
     strOutputs[0]+=tempStr;
-    if(imgProcessors[0]->img_output2.rows==1)
+    if(ui->checkBoxSaving->isChecked())
     {
-        tempStr="class scores: ";
-        for(int i=0;i<imgProcessors[0]->img_output2.cols;i++)
-            tempStr+=(QString::number(imgProcessors[0]->img_output2.at<float>(0, i),'f',1)+",");
-        strOutputs[0]+=tempStr;
-        if(ui->checkBoxSaving->isChecked())
+        if(iwts[0]->iwtMutex.tryLock())
         {
-            if(imgProcessors[0]->img_output2.at<float>(0, 0)>imgProcessors[0]->img_output2.at<float>(0, 1)
-                    && iwts[0]->iwtMutex.tryLock())
-            {
-                iwts[0]->headname="_ch1_";
-                iwts[0]->qimg=disImage;
-                QThreadPool::globalInstance()->start(iwts[0]);
-                iwts[0]->iwtMutex.unlock();
-            }
+            iwts[0]->headname="_ch1_";
+            iwts[0]->qimg=disImage;
+            QThreadPool::globalInstance()->start(iwts[0]);
+            iwts[0]->iwtMutex.unlock();
         }
     }
     ui->textBrowser1->setText(strOutputs[0]);
@@ -438,6 +445,8 @@ void MainWindow::slotimagebox2Refresh()
                 imgProcessors[1]->img_input1.cols*imgProcessors[1]->img_input1.channels(),
                 QImage::Format_RGB888);
     pixmapShows[1].setPixmap(QPixmap::fromImage(disImage));
+    if(autoStart)
+        ui->imagebox2->Adapte();
     long gap2recv=timers[1].elapsed();
     timers[1].start();
     //界面状态显示
@@ -449,22 +458,14 @@ void MainWindow::slotimagebox2Refresh()
     double fps=1000/double(gap2recv);
     tempStr="2nd camera FPS(processed): "+QString::number(fps,'f',1)+".\n";
     strOutputs[1]+=tempStr;
-    if(imgProcessors[1]->img_output2.rows==1)
+    if(ui->checkBoxSaving->isChecked())
     {
-        tempStr="class scores: ";
-        for(int i=0;i<imgProcessors[1]->img_output2.cols;i++)
-            tempStr+=(QString::number(imgProcessors[1]->img_output2.at<float>(0, i),'f',1)+",");
-        strOutputs[1]+=tempStr;
-        if(ui->checkBoxSaving->isChecked())
+        if(iwts[1]->iwtMutex.tryLock())
         {
-            if(imgProcessors[1]->img_output2.at<float>(0, 0)>imgProcessors[1]->img_output2.at<float>(0, 1)
-                    && iwts[1]->iwtMutex.tryLock())
-            {
-                iwts[1]->headname="_ch2_";
-                iwts[1]->qimg=disImage;
-                QThreadPool::globalInstance()->start(iwts[1]);
-                iwts[1]->iwtMutex.unlock();
-            }
+            iwts[1]->headname="_ch2_";
+            iwts[1]->qimg=disImage;
+            QThreadPool::globalInstance()->start(iwts[1]);
+            iwts[1]->iwtMutex.unlock();
         }
     }
     ui->textBrowser2->setText(strOutputs[1]);
@@ -489,6 +490,8 @@ void MainWindow::slotimagebox3Refresh()
                 imgProcessors[2]->img_input1.cols*imgProcessors[2]->img_input1.channels(),
                 QImage::Format_RGB888);
     pixmapShows[2].setPixmap(QPixmap::fromImage(disImage));
+    if(autoStart)
+        ui->imagebox3->Adapte();
     long gap2recv=timers[2].elapsed();
     timers[2].start();
     //界面状态显示
@@ -500,22 +503,14 @@ void MainWindow::slotimagebox3Refresh()
     double fps=1000/double(gap2recv);
     tempStr="3rd camera FPS(processed): "+QString::number(fps,'f',1)+".\n";
     strOutputs[2]+=tempStr;
-    if(imgProcessors[2]->img_output2.rows==1)
+    if(ui->checkBoxSaving->isChecked())
     {
-        tempStr="class scores: ";
-        for(int i=0;i<imgProcessors[2]->img_output2.cols;i++)
-            tempStr+=(QString::number(imgProcessors[2]->img_output2.at<float>(0, i),'f',1)+",");
-        strOutputs[2]+=tempStr;
-        if(ui->checkBoxSaving->isChecked())
+        if(iwts[2]->iwtMutex.tryLock())
         {
-            if(imgProcessors[2]->img_output2.at<float>(0, 0)>imgProcessors[2]->img_output2.at<float>(0, 1)
-                    && iwts[2]->iwtMutex.tryLock())
-            {
-                iwts[2]->headname="_ch3_";
-                iwts[2]->qimg=disImage;
-                QThreadPool::globalInstance()->start(iwts[2]);
-                iwts[2]->iwtMutex.unlock();
-            }
+            iwts[2]->headname="_ch3_";
+            iwts[2]->qimg=disImage;
+            QThreadPool::globalInstance()->start(iwts[2]);
+            iwts[2]->iwtMutex.unlock();
         }
     }
     ui->textBrowser3->setText(strOutputs[2]);
@@ -541,6 +536,8 @@ void MainWindow::slotimagebox4Refresh()
                 QImage::Format_RGB888);
 
     pixmapShows[3].setPixmap(QPixmap::fromImage(disImage));
+    if(autoStart)
+        ui->imagebox4->Adapte();
     int gap2recv=timers[3].elapsed();
     timers[3].start();
     //界面状态显示
@@ -552,22 +549,14 @@ void MainWindow::slotimagebox4Refresh()
     double fps=1000/double(gap2recv);
     tempStr="4th camera FPS(processed): "+QString::number(fps,'f',1)+".\n";
     strOutputs[3]+=tempStr;
-    if(imgProcessors[3]->img_output2.rows==1)
+    if(ui->checkBoxSaving->isChecked())
     {
-        tempStr="class scores: ";
-        for(int i=0;i<imgProcessors[3]->img_output2.cols;i++)
-            tempStr+=(QString::number(imgProcessors[3]->img_output2.at<float>(0, i),'f',1)+",");
-        strOutputs[3]+=tempStr;
-        if(ui->checkBoxSaving->isChecked())
+        if(iwts[3]->iwtMutex.tryLock())
         {
-            if(imgProcessors[3]->img_output2.at<float>(0, 0)>imgProcessors[3]->img_output2.at<float>(0, 1)
-                    && iwts[3]->iwtMutex.tryLock())
-            {
-                iwts[3]->headname="_ch4_";
-                iwts[3]->qimg=disImage;
-                QThreadPool::globalInstance()->start(iwts[3]);
-                iwts[3]->iwtMutex.unlock();
-            }
+            iwts[3]->headname="_ch4_";
+            iwts[3]->qimg=disImage;
+            QThreadPool::globalInstance()->start(iwts[3]);
+            iwts[3]->iwtMutex.unlock();
         }
     }
     ui->textBrowser4->setText(strOutputs[3]);
@@ -692,6 +681,9 @@ void MainWindow::slotGetOneFrame4(QImage img)
         ui->textBrowser4->setText(strOutputs[3]);
         strOutputs[3].clear();
         tempStr.clear();
+
+        if(autoStart && !isDetecting)
+            ui->buttonProcess->click();
     }
 
 //    if(cams[3]->isCapturing && imgProcessors[3]->isDetecting)

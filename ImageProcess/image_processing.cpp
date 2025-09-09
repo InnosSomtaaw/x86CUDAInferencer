@@ -156,7 +156,7 @@ void ImageWriter::run()
     QDateTime current_date_time =QDateTime::currentDateTime();
     QString current_date =current_date_time.toString("yyyy_MM_dd");
     QString current_time =current_date_time.toString("hh_mm_ss_zzz");
-    QString dir_str = "/mnt/home/zhangshaoyue/SaveFile/"+current_date+"/";
+    QString dir_str = SAVE_LOC+current_date+"/";
     QDir dir;
     if (!dir.exists(dir_str))
     {
@@ -186,7 +186,7 @@ void ImageWriter::run()
 void ImageWriter::autoDeleteFolder(int numBk)
 {
     QDate currentDate =QDate::currentDate();
-    QDir dir("/mnt/home/orangepi/SaveFile/");
+    QDir dir(SAVE_LOC);
     if(!dir.exists())
         return;
     dir.setFilter(QDir::Dirs);

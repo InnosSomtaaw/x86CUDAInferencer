@@ -16,6 +16,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/ocl.hpp>
 
+#define SAVE_LOC "/mnt/data/SaveFile/"
+
 QT_BEGIN_NAMESPACE
 using namespace cv;
 using namespace std;
